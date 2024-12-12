@@ -1,0 +1,18 @@
+# Trust Curve
+num_rotors: 4
+time_constant_up: 0.0125
+time_constant_down: 0.025
+rotor_constant: [2.9265e-07, 2.9265e-07, 2.9265e-07, 2.9265e-07] # rad/s
+moment_constant: [8.8e-3, 8.8e-3, 8.8e-3, 8.8e-3] # m
+rolling_moment_coefficient: [1.0e-6, 1.0e-6, 1.0e-6, 1.0e-6]
+rotor_drag_coefficient: [2.419284e-05, 2.419284e-05, 2.419284e-05, 2.419284e-05]
+rot_dir: [1, 1, -1, -1] # 1 for CCW, -1 for CW
+min_rotor_velocity: [0, 0, 0, 0]                # rad/s
+max_rotor_velocity: [3383, 3383, 3383, 3383]    # rad/s
+
+# Linear Drag
+linear_drag: [0.1, 0.0, 0.0] # N/(m/s)
+
+# Mavlink Interface
+input_scaling: [5400, 5400, 5400, 5400]
+input_offset: [0, 0, 0, 0]

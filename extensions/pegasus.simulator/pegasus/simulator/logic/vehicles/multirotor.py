@@ -25,7 +25,7 @@ class MultirotorConfig:
     A data class that is used for configuring a Multirotor
     """
 
-    def __init__(self):
+    def __init__(self, config={}):
         """
         Initialization of the MultirotorConfig class
         """
@@ -37,8 +37,8 @@ class MultirotorConfig:
         self.usd_file = ""
 
         # The default thrust curve for a quadrotor and dynamics relating to drag
-        self.thrust_curve = QuadraticThrustCurve()
-        self.drag = LinearDrag([0.50, 0.30, 0.0])
+        self.thrust_curve = QuadraticThrustCurve(config)
+        self.drag = LinearDrag(config.get("linear_drag", [0.50, 0.30, 0.0]))
 
         # The default sensors for a quadrotor
         self.sensors = [Barometer(), IMU(), Magnetometer(), GPS()]
@@ -118,19 +118,22 @@ class Multirotor(Vehicle):
         self._thrusters.set_input_reference(desired_rotor_velocities)
 
         # Get the desired forces to apply to the vehicle
-        forces_z, _, rolling_moment = self._thrusters.update(self._state, dt)
+        forces_z, _, drag_torque, air_drag, rolling_moment = self._thrusters.update(self._state, dt)
 
         # Apply force to each rotor
-        for i in range(4):
-
+        for i in range(self._thrusters._num_rotors):
             # Apply the force in Z on the rotor frame
             self.apply_force([0.0, 0.0, forces_z[i]], body_part="/rotor" + str(i))
-
-            # Generate the rotating propeller visual effect
-            self.handle_propeller_visual(i, forces_z[i], articulation)
-
-        # Apply the torque to the body frame of the vehicle that corresponds to the rolling moment
-        self.apply_torque([0.0, 0.0, rolling_moment], "/body")
+            self.apply_force(air_drag[i], pos = self._state.position.tolist(), body_part="/rotor" + str(i), global_coordinate=True)
+        
+        # Generate the rotating propeller visual effect
+        self.handle_propeller_visual(articulation)
+        
+        # Apply the torque to the body frame of the vehicle that corresponds to the drag torque
+        self.apply_torque([0.0, 0.0, drag_torque], body_part="/body")
+        
+        # Apply the rolling moment to the body frame of the vehicle
+        self.apply_torque(rolling_moment, body_part="/body", global_coordinate=True)
 
         # Compute the total linear drag force to apply to the vehicle's body frame
         drag = self._drag.update(self._state, dt)
@@ -140,29 +143,26 @@ class Multirotor(Vehicle):
         for backend in self._backends:
             backend.update(dt)
 
-    def handle_propeller_visual(self, rotor_number, force: float, articulation):
+    def handle_propeller_visual(self, articulation):
         """
         Auxiliar method used to set the joint velocity of each rotor (for animation purposes) based on the 
-        amount of force being applied on each joint
+        velocity of each joint
 
         Args:
-            rotor_number (int): The number of the rotor to generate the rotation animation
-            force (float): The force that is being applied on that rotor
             articulation (_type_): The articulation group the joints of the rotors belong to
         """
 
         # Rotate the joint to yield the visual of a rotor spinning (for animation purposes only)
-        joint = self.get_dc_interface().find_articulation_dof(articulation, "joint" + str(rotor_number))
-
-        # Spinning when armed but not applying force
-        if 0.0 < force < 0.1:
-            self.get_dc_interface().set_dof_velocity(joint, 5 * self._thrusters.rot_dir[rotor_number])
-        # Spinning when armed and applying force
-        elif 0.1 <= force:
-            self.get_dc_interface().set_dof_velocity(joint, 100 * self._thrusters.rot_dir[rotor_number])
-        # Not spinning
-        else:
-            self.get_dc_interface().set_dof_velocity(joint, 0)
+        for i in range(self._thrusters._num_rotors):
+            joint = self.get_dc_interface().find_articulation_dof(articulation, "joint" + str(i))
+            
+            # Scale the velocity to a value between -100 rad/s and 100 rad/s
+            velocity = self._thrusters.velocity[i] * self._thrusters.rot_dir[i]
+            velocity = velocity / self._thrusters.max_rotor_velocity[i]
+            velocity = velocity * 100
+            
+            # Set the velocity of the joint
+            self.get_dc_interface().set_dof_velocity(joint, velocity)
 
     def force_and_torques_to_velocities(self, force: float, torque: np.ndarray):
         """
@@ -179,6 +179,8 @@ class Multirotor(Vehicle):
         Returns:
             list: A list of angular velocities [rad/s] to apply in reach rotor to accomplish suchs forces and torques
         """
+        
+        #TODO 2024/12/26
 
         # Get the body frame of the vehicle
         rb = self.get_dc_interface().get_rigid_body(self._stage_prefix + "/body")

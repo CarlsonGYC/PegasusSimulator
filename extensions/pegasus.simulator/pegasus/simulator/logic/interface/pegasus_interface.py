@@ -208,21 +208,37 @@ class PegasusInterface:
         """
         return SIMULATION_ENVIRONMENTS
 
-    def generate_quadrotor_config_from_yaml(self, file: str):
-        """_summary_
+    def generate_quadrotor_config_from_dict(self, config: dict):
+        """
+        Generate a quadrotor configuration from a dictionary that contains the quadrotor configuration
 
         Args:
-            file (str): _description_
+            config (dict): Contains the quadrotor configuration
+            
+        Returns:
+            config_multirotor (MultirotorConfig): The configuration of the multirotor
+        """
+        
+        from pegasus.simulator.logic.vehicles.multirotor import MultirotorConfig
+        return MultirotorConfig(config)
+        
+    
+    def generate_quadrotor_config_from_yaml(self, file: str):
+        """
+        Generate a quadrotor configuration from a yaml file
+
+        Args:
+            file (str): The path to the yaml file that contains the quadrotor configuration
 
         Returns:
-            _type_: _description_
+            config_multirotor (MultirotorConfig): The configuration of the multirotor
         """
 
         # Load the quadrotor configuration data from the given yaml file
         with open(file) as f:
-            data = yaml.safe_load(f)
+            config = yaml.safe_load(f)
 
-        return self.generate_quadrotor_config_from_dict(data)
+        return self.generate_quadrotor_config_from_dict(config)
 
     def clear_scene(self):
         """

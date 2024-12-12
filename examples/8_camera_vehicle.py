@@ -78,7 +78,8 @@ class PegasusApp:
         mavlink_config = PX4MavlinkBackendConfig({
             "vehicle_id": 0,
             "px4_autolaunch": True,
-            "px4_dir": "/home/marcelo/PX4-Autopilot"
+            "px4_dir": self.pg.px4_path,
+            "px4_vehicle_model": self.pg.px4_default_airframe # CHANGE this line to 'iris' if using PX4 version bellow v1.14
         })
         config_multirotor.backends = [
             PX4MavlinkBackend(mavlink_config), 

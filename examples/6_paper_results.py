@@ -30,7 +30,7 @@ import omni.kit.commands
 from pxr import Sdf
 
 # Import the Pegasus API for simulating drones
-from pegasus.simulator.params import ROBOTS
+from pegasus.simulator.params import ROBOTS, SIMULATION_ENVIRONMENTS
 from pegasus.simulator.logic.vehicles.multirotor import Multirotor, MultirotorConfig
 from pegasus.simulator.logic.dynamics.linear_drag import LinearDrag
 from pegasus.simulator.logic.interface.pegasus_interface import PegasusInterface
@@ -71,16 +71,17 @@ class PegasusApp:
         self.pg._world = World(**self.pg._world_settings)
         self.world = self.pg.world
 
-        prim_utils.create_prim(
-            "/World/Light/DomeLight",
-            "DomeLight",
-            position=np.array([1.0, 1.0, 1.0]),
-            attributes={
-                "inputs:intensity": 5e3,
-                "inputs:color": (1.0, 1.0, 1.0),
-                "inputs:texture:file": "omniverse://localhost/NVIDIA/Assets/Skies/Indoor/ZetoCGcom_ExhibitionHall_Interior1.hdr"
-            }
-        )
+        self.world.scene.add_default_ground_plane()
+        # prim_utils.create_prim(
+        #     "/World/Light/DomeLight",
+        #     "DomeLight",
+        #     position=np.array([1.0, 1.0, 1.0]),
+        #     attributes={
+        #         "inputs:intensity": 5e3,
+        #         "inputs:color": (1.0, 1.0, 1.0),
+        #         "inputs:texture:file": "omniverse://localhost/NVIDIA/Assets/Skies/Indoor/ZetoCGcom_ExhibitionHall_Interior1.hdr"
+        #     }
+        # )
 
         # Get the current directory used to read trajectories and save results
         self.curr_dir = str(Path(os.path.dirname(os.path.realpath(__file__))).resolve())

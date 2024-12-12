@@ -247,9 +247,9 @@ class Vehicle(Robot):
 
             self.stop()
 
-    def apply_force(self, force, pos=[0.0, 0.0, 0.0], body_part="/body"):
+    def apply_force(self, force, pos=[0.0, 0.0, 0.0], body_part="/body", global_coordinate=False):
         """
-        Method that will apply a force on the rigidbody, on the part specified in the 'body_part' at its relative position
+        Method that will apply a force on the rigidbody, on the part specified in the 'body_part' at its relative frame or global frame.
         given by 'pos' (following a FLU) convention. 
 
         Args:
@@ -261,12 +261,12 @@ class Vehicle(Robot):
         # Get the handle of the rigidbody that we will apply the force to
         rb = self.get_dc_interface().get_rigid_body(self._stage_prefix + body_part)
 
-        # Apply the force to the rigidbody. The force should be expressed in the rigidbody frame
-        self.get_dc_interface().apply_body_force(rb, carb._carb.Float3(force), carb._carb.Float3(pos), False)
+        # Apply the force to the rigidbody. The force can be expressed in the relative frame or global frame
+        self.get_dc_interface().apply_body_force(rb, carb._carb.Float3(force), carb._carb.Float3(pos), global_coordinate)
 
-    def apply_torque(self, torque, body_part="/body"):
+    def apply_torque(self, torque, body_part="/body", global_coordinate=False):
         """
-        Method that when invoked applies a given torque vector to /<rigid_body_name>/"body" or to /<rigid_body_name>/<body_part>.
+        Method that when invoked applies a given torque vector to /<rigid_body_name>/"body" or to /<rigid_body_name>/<body_part> at its relative frame or global frame.
 
         Args:
             torque (list): A 3-dimensional vector of floats with the force [Tx, Ty, Tz] on the body axis of the vehicle according to a FLU convention.
@@ -276,8 +276,8 @@ class Vehicle(Robot):
         # Get the handle of the rigidbody that we will apply a torque to
         rb = self.get_dc_interface().get_rigid_body(self._stage_prefix + body_part)
 
-        # Apply the torque to the rigidbody. The torque should be expressed in the rigidbody frame
-        self.get_dc_interface().apply_body_torque(rb, carb._carb.Float3(torque), False)
+        # Apply the torque to the rigidbody. The torque can be expressed in the relative frame or global frame
+        self.get_dc_interface().apply_body_torque(rb, carb._carb.Float3(torque), global_coordinate)
 
     def update_state(self, dt: float):
         """
