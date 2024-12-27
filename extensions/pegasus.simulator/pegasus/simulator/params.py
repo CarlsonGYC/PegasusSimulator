@@ -21,14 +21,16 @@ EXTENSION_FOLDER_PATH = Path(os.path.dirname(os.path.realpath(__file__)))
 ROOT = str(EXTENSION_FOLDER_PATH.parent.parent.parent.resolve())
 
 # Get the configurations file path
-CONFIG_FILE = ROOT + "/pegasus.simulator/config/configs.yaml"
+CONFIG_PATH = ROOT + "/pegasus.simulator/config"
+CONFIG_FILE = CONFIG_PATH + "/configs.yaml"
 
 # Define the Extension Assets Path
 ASSET_PATH = ROOT + "/pegasus.simulator/pegasus/simulator/assets"
 ROBOTS_ASSETS = ASSET_PATH + "/Robots"
 
 # Define the built in robots of the extension
-ROBOTS = {"Iris": ROBOTS_ASSETS + "/Iris/iris.usd"} #, "Flying Cube": ROBOTS_ASSETS + "/iris_cube.usda"}
+ROBOTS = {"Iris": ROBOTS_ASSETS + "/Iris/iris.usd", "Raynor": ROBOTS_ASSETS + "/Raynor/raynor.usd"} #, "Flying Cube": ROBOTS_ASSETS + "/iris_cube.usda"}
+ROBOTS_CONFIG = {"Iris": CONFIG_PATH + "/iris.yaml", "Raynor": CONFIG_PATH + "/raynor.yaml"}
 
 # Setup the default simulation environments path
 NVIDIA_ASSETS_PATH = str(nucleus.get_assets_root_path())

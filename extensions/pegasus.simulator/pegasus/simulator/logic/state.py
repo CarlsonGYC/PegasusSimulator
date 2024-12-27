@@ -117,3 +117,24 @@ class State:
             np.ndarray: An array with [x_ddot, y_ddot, z_ddot] with the acceleration of the vehicle expressed in the inertial frame according to an NED convention.
         """
         return rot_ENU_to_NED.apply(self.linear_acceleration)
+
+    def get_axis_vector(self, axis = 0):
+        """
+        Converts the quaternion orientation of the vehicle to a vector representing the
+        vehicle's orientation (e.g., forward direction) in the inertial frame.
+
+        Returns:
+            np.ndarray: A numpy array representing the direction vector in the inertial frame.
+        """
+        # Create rotation object from quaternion
+        rotation = Rotation.from_quat(self.attitude)  # self.attitude = [x, y, z, w]
+
+        # axis: 0 -> x, 1 -> y, 2 -> z
+        assert axis in [0, 1, 2], "axis must be 0 -> x, 1 -> y or 2 -> z"
+        axis_vector = np.array([0.0, 0.0, 0.0])
+        axis_vector[axis] = 1.0
+
+        # Transform local axis to global
+        axis_vector = rotation.apply(axis_vector)
+
+        return axis_vector
