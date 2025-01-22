@@ -582,6 +582,9 @@ class PX4MavlinkBackend(Backend):
             dt (float): The time elapsed between the previous and current function calls (s).
         """
 
+        # Update the current u_time for px4
+        self._current_utime += int(dt * 1000000)
+
         # Check for the first hearbeat on the first few iterations
         if not self._received_first_hearbeat:
             self.wait_for_first_hearbeat()
@@ -602,8 +605,6 @@ class PX4MavlinkBackend(Backend):
             self.send_heartbeat()
             self._last_heartbeat_sent_time = time.time()
 
-        # Update the current u_time for px4
-        self._current_utime += int(dt * 1000000)
 
         # Send sensor messages
         self.send_sensor_msgs(self._current_utime)
