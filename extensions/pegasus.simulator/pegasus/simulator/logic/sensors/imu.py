@@ -38,7 +38,7 @@ class IMU(Sensor):
             >>>         "bias_correlation_time": 300.0,
             >>>         "turn_on_bias_sigma": 20.0e-3 * 9.8
             >>> },
-            >>>  "update_rate": 1.0}                 # Hz
+            >>>  "update_rate": 250.0}                 # Hz
         """
 
         # Initialize the Super class "object" attributes
