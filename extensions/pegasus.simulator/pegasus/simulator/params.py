@@ -29,7 +29,7 @@ ASSET_PATH = ROOT + "/pegasus.simulator/pegasus/simulator/assets"
 ROBOTS_ASSETS = ASSET_PATH + "/Robots"
 
 # Define the built in robots of the extension
-ROBOTS = {"Iris": ROBOTS_ASSETS + "/Iris/iris.usd", "Raynor": ROBOTS_ASSETS + "/Raynor/raynor.usd"} #, "Flying Cube": ROBOTS_ASSETS + "/iris_cube.usda"}
+ROBOTS = {"Iris": ROBOTS_ASSETS + "/Iris/iris.usd", "Raynor": ROBOTS_ASSETS + "/Raynor/raynor.usd", "Cable": ROBOTS_ASSETS + "/Cable/sitl_test.usd", "Single Cable": ROBOTS_ASSETS + "/Cable/APIcable_single.usd"} #, "Flying Cube": ROBOTS_ASSETS + "/iris_cube.usda"}
 ROBOTS_CONFIG = {"Iris": CONFIG_PATH + "/iris.yaml", "Raynor": CONFIG_PATH + "/raynor.yaml"}
 
 # Setup the default simulation environments path
@@ -52,6 +52,7 @@ NVIDIA_SIMULATION_ENVIRONMENTS = {
     "Stairs Plane": "Terrains/stairs.usd",
 }
 
+
 OMNIVERSE_ENVIRONMENTS = {
     "Exhibition Hall": "omniverse://localhost/NVIDIA/Assets/Scenes/Templates/Interior/ZetCG_ExhibitionHall.usd"
 }
@@ -63,6 +64,11 @@ for asset in NVIDIA_SIMULATION_ENVIRONMENTS:
     SIMULATION_ENVIRONMENTS[asset] = (
         NVIDIA_ASSETS_PATH + ISAAC_SIM_ENVIRONMENTS + "/" + NVIDIA_SIMULATION_ENVIRONMENTS[asset]
     )
+
+# for asset in CABLE_ENVIRONMENTS:
+#     SIMULATION_ENVIRONMENTS[asset] = (
+#         "/home/carlson/isaac_ws/single_cable.usd"
+#     )
 
 # Add the omniverse assets to the list
 for asset in OMNIVERSE_ENVIRONMENTS:
@@ -77,7 +83,7 @@ BACKENDS = {
 # Define the default settings for the simulation environment
 WORLD_SETTINGS = {
     'px4': {
-        "physics_dt": 1.0 / 250.0,
+        "physics_dt": 1.0 / 1000.0,
         "stage_units_in_meters": 1.0,
         "rendering_dt": 1.0 / 60.0,
         "device": "cpu"
