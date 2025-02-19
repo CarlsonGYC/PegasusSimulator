@@ -14,7 +14,7 @@ import omni.timeline
 from omni.isaac.core.world import World
 from omni.isaac.dynamic_control import _dynamic_control as dc
 from pxr import UsdGeom, PhysxSchema
-import csv
+import omni.physx.scripts.utils as script_utils
 
 # 如果需要用 Pegasus 的相关类，可以自行 import
 from pegasus.simulator.params import ROBOTS, SIMULATION_ENVIRONMENTS
@@ -46,12 +46,14 @@ class PegasusApp:
         physics_context.enable_gpu_dynamics(True)
         physics_context.enable_stablization(False)
         physics_context.enable_ccd(False)
+        physics_context.set_gpu_max_num_partitions(32)
         PhysxSchema.PhysxSceneAPI.Apply(stage.GetPrimAtPath("/physicsScene"))
         physxSceneAPI = PhysxSchema.PhysxSceneAPI.Get(stage, "/physicsScene")
 
         # 加载环境和模型
         self.pg.load_environment(SIMULATION_ENVIRONMENTS["Curved Gridroom"])
         # self.pg.load_asset(ROBOTS["Single Cable"], "/World/cable")
+        # spawn_model()
 
         config_multirotor = MultirotorConfig()
         # config_multirotor = self.pg.generate_quadrotor_config_from_yaml(ROBOTS_CONFIG["Raynor"]) # Load Raynor's configuration
@@ -59,39 +61,43 @@ class PegasusApp:
         # self.pg.load_asset(ROBOTS["Cable"], "/World/quadrotor")
         
         # Create the multirotor configuration
-        vehicle_id = 0
-        mavlink_config = PX4MavlinkBackendConfig({
-            "vehicle_id": vehicle_id,
-            "px4_autolaunch": True,
-            "px4_dir": self.pg.px4_path,
-            "px4_vehicle_model": 'iris' # CHANGE this line to 'iris' if using PX4 version bellow v1.14
-        })
-        config_multirotor.backends = [PX4MavlinkBackend(mavlink_config)]
+        # vehicle_id = 0
+        # mavlink_config = PX4MavlinkBackendConfig({
+        #     "vehicle_id": vehicle_id,
+        #     "px4_autolaunch": True,
+        #     "px4_dir": self.pg.px4_path,
+        #     "px4_vehicle_model": 'iris' # CHANGE this line to 'iris' if using PX4 version bellow v1.14
+        # })
+        # config_multirotor.backends = [PX4MavlinkBackend(mavlink_config)]
 
-        Multirotor(
-            "/World/quadrotor",
-            # ROBOTS['Raynor'],
-            # ROBOTS['Iris'],
-            ROBOTS['Cable'],
-            0,
-            [0.0, 0.0, 0.11],
-            Rotation.from_euler("XYZ", [0.0, 0.0, 0.0], degrees=True).as_quat(),
-            config=config_multirotor,
-        )
+        # Multirotor(
+        #     "/World/quadrotor",
+        #     # ROBOTS['Raynor'],
+        #     # ROBOTS['Iris'],
+        #     ROBOTS['Cable'],
+        #     0,
+        #     [0.0, 0.0, 0.11],
+        #     Rotation.from_euler("XYZ", [0.0, 0.0, 0.0], degrees=True).as_quat(),
+        #     config=config_multirotor,
+        # )
         
         
-        # Reset the simulation environment so that all articulations (aka robots) are initialized
-        self.world.reset()
+        # # Reset the simulation environment so that all articulations (aka robots) are initialized
+        # self.world.reset()
 
-        # Auxiliar variable for the timeline callback example
-        self.stop_sim = False
+        # # Auxiliar variable for the timeline callback example
+        # self.stop_sim = False
 
     def run(self):
         """
         Method that implements the application main loop, where the physics steps are executed.
         """
 
-        # Start the simulation
+        # Reset the simulation environment so that all articulations (aka robots) are initialized
+        self.world.reset()
+
+        # Auxiliar variable for the timeline callback example
+        self.stop_sim = False
         self.timeline.play()
 
         # The "infinite" loop
@@ -114,6 +120,12 @@ class RigidBodyRopes(demo.Base):
     ## Main Call Funtion to build the scene ##
     def create(self, stage, num_ropes, rope_length, payload_mass, load_height=2.0, elevation_angle=0.0):
         self._stage = stage
+        # Ensure "/World" exists
+        if not stage.GetPrimAtPath("/World"):
+            stage.DefinePrim("/World", "Xform")
+
+        # Make "/World" the default prim explicitly
+        stage.SetDefaultPrim(stage.GetPrimAtPath("/World"))
         self._defaultPrimPath = stage.GetDefaultPrim().GetPath()
         
         ## Payload config:
@@ -197,7 +209,8 @@ class RigidBodyRopes(demo.Base):
 
         UsdPhysics.RigidBodyAPI.Apply(capsuleGeom.GetPrim())
         physx_rigid_api = PhysxSchema.PhysxRigidBodyAPI.Apply(capsuleGeom.GetPrim())
-        physx_rigid_api.CreateLinearDampingAttr(0.1)
+        physx_rigid_api.CreateLinearDampingAttr(1)
+        # physx_rigid_api.CreateAngularDampingAttr(0.1)
         # physx_rigid_api.GetSolverPositionIterationCountAttr(20)
         # physx_rigid_api.CreateCfmScaleAttr(0.2)
 
@@ -249,7 +262,7 @@ class RigidBodyRopes(demo.Base):
         cubeGeom.CreateExtentAttr([(-half_extent, -half_extent, -half_extent), (half_extent, half_extent, half_extent)])
 
         rigidAPI = UsdPhysics.RigidBodyAPI.Apply(cubePrim)
-        rigidAPI.CreateRigidBodyEnabledAttr(False)
+        # rigidAPI.CreateRigidBodyEnabledAttr(False)
 
         UsdPhysics.CollisionAPI.Apply(cubePrim)
             
@@ -314,7 +327,11 @@ class RigidBodyRopes(demo.Base):
         for d in rotatedDOFs:
             limitAPI = UsdPhysics.LimitAPI.Apply(d6Prim, d)
             physx_limit_api = PhysxSchema.PhysxLimitAPI.Apply(d6Prim, d)
-            # physx_limit_api.CreateDampingAttr(0.1)
+            driveAPI = UsdPhysics.DriveAPI.Apply(d6Prim, d)
+            driveAPI.CreateTypeAttr("force")
+            # driveAPI.CreateMaxForceAttr(self._slideMaxforceLimit)
+            driveAPI.CreateDampingAttr(0.01)
+            # driveAPI.CreateStiffnessAttr(self._slide_stiffness)
             # limitAPI.CreateLowAttr(-self._coneAngleLimit)
             # limitAPI.CreateHighAttr(self._coneAngleLimit)
 
@@ -721,41 +738,19 @@ class RigidBodyRopes(demo.Base):
 def spawn_model():
     model_instance = RigidBodyRopes()
     pg_app = PegasusApp()
-    kit = SimulationApp({"renderer": "RayTracedLighting", "headless": False})
+    # kit = SimulationApp({"renderer": "RayTracedLighting", "headless": False})
 
     # Initialize the World instance
-    world = World()
+    world = pg_app.world
     # Get the stage from the World instance
     stage = world.stage
-    # world.initialize_physics()
-    # physics_context = world.get_physics_context()
-    # physics_context.set_solver_type("TGS")
-    # physics_context.set_broadphase_type("GPU")
-    # physics_context.enable_gpu_dynamics(True)
-    # physics_context.enable_stablization(True)
-    # physics_context.enable_ccd(True)
-    # physics_context.set_friction_offset_threshold(0.01)
-    # physics_context.set_gpu_max_num_partitions(32)
-
-    # Set Solver iteration count
-    # PhysxSchema.PhysxSceneAPI.Apply(stage.GetPrimAtPath("/World/physicsScene"))
-    # physxSceneAPI = PhysxSchema.PhysxSceneAPI.Get(stage, "/World/physicsScene")
-    ## IMPORTANT: Set the solver iteration count ##############################
-    # physxSceneAPI.CreateMinPositionIterationCountAttr(25) # For 1~6Kg. 7Kg or higher mass got issues 
-    # physxSceneAPI.CreateMinVelocityIterationCountAttr(0)
-    ###########################################################################
-
-    defaultPrimPath = Sdf.Path("/World")
-    stage.DefinePrim(defaultPrimPath)
-    stage.SetDefaultPrim(stage.GetPrimAtPath(defaultPrimPath))
-
     # Call the create method with the desired parameters
     loadOn1Rope = 0.5
 
     # To test 1 rope in vertical, set num_ropes = 1.
     # num_ropes = 1
     # To test multiple ropes, set num_ropes > 1 and customed elevation angle.
-    num_ropes = 6
+    num_ropes = 3
     rope_length = 1.0
     load_height = 0.03
     elevation_angle = 0
@@ -774,13 +769,90 @@ def spawn_model():
         load_height=load_height,
         elevation_angle=elevation_angle
         )
+    
+    # config_multirotor = MultirotorConfig()
+    xformCache = UsdGeom.XformCache()
+    # breakpoint()# Create the multirotor configuration
+        # vehicle_id = 0
+        # mavlink_config = PX4MavlinkBackendConfig({
+        #     "vehicle_id": vehicle_id,
+        #     "px4_autolaunch": True,
+        #     "px4_dir": self.pg.px4_path,
+        #     "px4_vehicle_model": 'iris' # CHANGE this line to 'iris' if using PX4 version bellow v1.14
+        # })
+        # config_multirotor.backends = [PX4MavlinkBackend(mavlink_config)]
 
+        # Multirotor(
+        #     "/World/quadrotor",
+        #     # ROBOTS['Raynor'],
+        #     # ROBOTS['Iris'],
+        #     ROBOTS['Cable'],
+        #     0,
+        #     [0.0, 0.0, 0.11],
+        #     Rotation.from_euler("XYZ", [0.0, 0.0, 0.0], degrees=True).as_quat(),
+        #     config=config_multirotor,
+        # )
+        
+        
+        # # Reset the simulation environment so that all articulations (aka robots) are initialized
+        # self.world.reset()
+
+        # # Auxiliar variable for the timeline callback example
+        # self.stop_sim = False
+        
+    for vehicle_id in range(0, num_ropes):
+        # Create the multirotor configuration
+        config_multirotor = MultirotorConfig()
+        # breakpoint()
+        box_path = f"/World/Rope{vehicle_id}/box{vehicle_id}Actor"
+        box_prim = stage.GetPrimAtPath(box_path)
+        box_xform = xformCache.GetLocalToWorldTransform(box_prim)
+        box_pos = box_xform.ExtractTranslation()
+        drone_pos = box_pos + Gf.Vec3d(0.0, 0.0, 0.07)
+        mavlink_config = PX4MavlinkBackendConfig({
+            "vehicle_id": vehicle_id,
+            "px4_autolaunch": True,
+            "px4_dir": pg_app.pg.px4_path,
+            "px4_vehicle_model": "iris" # CHANGE this line to 'iris' if using PX4 version bellow v1.14
+        })
+        config_multirotor.backends = [PX4MavlinkBackend(mavlink_config)]
+
+        # Create the drone in the world
+        Multirotor(
+            "/World/quadrotor",
+            ROBOTS['Iris'],
+            vehicle_id,
+            drone_pos,
+            Rotation.from_euler("XYZ", [0.0, 0.0, 0.0], degrees=True).as_quat(),
+            config=config_multirotor)
+        
+        # breakpoint()
+
+        # Create joints between loads and drones
+        if vehicle_id==0 :
+            droneJointPath = f"/World/Rope{vehicle_id}/droneJoint"
+            droneBodyPath = f"/World/quadrotor/body"
+            droneJoint = UsdPhysics.Joint.Define(stage, droneJointPath)
+            droneJoint.CreateBody0Rel().SetTargets([box_path])
+            droneJoint.CreateBody1Rel().SetTargets([droneBodyPath])
+            joint_pos = Gf.Vec3f(0.0, 0.0, -0.08)
+            droneJoint.CreateLocalPos0Attr().Set(Gf.Vec3f(0.0, 0.0, 0.0))
+            droneJoint.CreateLocalPos1Attr().Set(joint_pos)
+        else:
+            droneJointPath = f"/World/Rope{vehicle_id}/droneJoint"
+            droneBodyPath = f"/World/quadrotor_0{vehicle_id}/body"
+            droneJoint = UsdPhysics.Joint.Define(stage, droneJointPath)
+            droneJoint.CreateBody0Rel().SetTargets([box_path])
+            droneJoint.CreateBody1Rel().SetTargets([droneBodyPath])
+            joint_pos = Gf.Vec3f(0.0, 0.0, -0.08)
+            droneJoint.CreateLocalPos0Attr().Set(Gf.Vec3f(0.0, 0.0, 0.0))
+            droneJoint.CreateLocalPos1Attr().Set(joint_pos)
 
 def main():
 
     # Instantiate the template app
     pg_app = PegasusApp()
-    # spawn_model()
+    spawn_model()
     # Run the application loop
     pg_app.run()
 
