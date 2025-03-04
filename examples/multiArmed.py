@@ -26,13 +26,13 @@ async def arm_and_takeoff(drone: System, drone_id: int):
     print(f"[Drone {drone_id}] 正在解锁 (arm)...")
     await drone.action.arm()
     # 等待确保解锁完成
-    await asyncio.sleep(10)
+    await asyncio.sleep(5)
 
     # 起飞（takeoff）
     print(f"[Drone {drone_id}] 正在起飞 (takeoff)...")
     await drone.action.takeoff()
     # 等待5秒让无人机有足够时间起飞到指定高度
-    # await asyncio.sleep(5)
+    await asyncio.sleep(50)
 
 
 async def main():

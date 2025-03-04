@@ -120,6 +120,7 @@ class Multirotor(Vehicle):
         # Get the desired forces to apply to the vehicle
         forces_z, _, drag_torque, air_drag, rolling_moment = self._thrusters.update(self._state, dt)
 
+
         # Apply force to each rotor
         for i in range(self._thrusters._num_rotors):
             # Apply the force in Z on the rotor frame
@@ -184,6 +185,8 @@ class Multirotor(Vehicle):
 
         # Get the body frame of the vehicle
         rb = self.get_dc_interface().get_rigid_body(self._stage_prefix + "/body")
+        # print("-----------------------------------------------")
+        # print(self._stage_prefix)
 
         # Get the rotors of the vehicle
         rotors = [self.get_dc_interface().get_rigid_body(self._stage_prefix + "/rotor" + str(i)) for i in range(self._thrusters._num_rotors)]

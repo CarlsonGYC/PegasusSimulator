@@ -75,6 +75,7 @@ class RateController(nn.Module):
 
 
 import numpy as np
+import math
 import matplotlib.pyplot as plt
 
 def test_rate_controller():

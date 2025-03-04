@@ -209,7 +209,7 @@ class RigidBodyRopes(demo.Base):
 
         UsdPhysics.RigidBodyAPI.Apply(capsuleGeom.GetPrim())
         physx_rigid_api = PhysxSchema.PhysxRigidBodyAPI.Apply(capsuleGeom.GetPrim())
-        physx_rigid_api.CreateLinearDampingAttr(1)
+        # physx_rigid_api.CreateLinearDampingAttr(1)
         # physx_rigid_api.CreateAngularDampingAttr(0.1)
         # physx_rigid_api.GetSolverPositionIterationCountAttr(20)
         # physx_rigid_api.CreateCfmScaleAttr(0.2)
@@ -330,7 +330,7 @@ class RigidBodyRopes(demo.Base):
             driveAPI = UsdPhysics.DriveAPI.Apply(d6Prim, d)
             driveAPI.CreateTypeAttr("force")
             # driveAPI.CreateMaxForceAttr(self._slideMaxforceLimit)
-            driveAPI.CreateDampingAttr(0.01)
+            driveAPI.CreateDampingAttr(0.001)
             # driveAPI.CreateStiffnessAttr(self._slide_stiffness)
             # limitAPI.CreateLowAttr(-self._coneAngleLimit)
             # limitAPI.CreateHighAttr(self._coneAngleLimit)
@@ -750,8 +750,8 @@ def spawn_model():
     # To test 1 rope in vertical, set num_ropes = 1.
     # num_ropes = 1
     # To test multiple ropes, set num_ropes > 1 and customed elevation angle.
-    num_ropes = 3
-    rope_length = 1.0
+    num_ropes = 6
+    rope_length = 2
     load_height = 0.03
     elevation_angle = 0
 
@@ -765,7 +765,7 @@ def spawn_model():
         stage, 
         num_ropes=num_ropes, 
         rope_length=rope_length,
-        payload_mass=3,
+        payload_mass=6,
         load_height=load_height,
         elevation_angle=elevation_angle
         )
@@ -802,18 +802,17 @@ def spawn_model():
         
     for vehicle_id in range(0, num_ropes):
         # Create the multirotor configuration
-        config_multirotor = MultirotorConfig()
-        # breakpoint()
         box_path = f"/World/Rope{vehicle_id}/box{vehicle_id}Actor"
         box_prim = stage.GetPrimAtPath(box_path)
         box_xform = xformCache.GetLocalToWorldTransform(box_prim)
         box_pos = box_xform.ExtractTranslation()
-        drone_pos = box_pos + Gf.Vec3d(0.0, 0.0, 0.07)
+        drone_pos = box_pos + Gf.Vec3d(0.0, 0.0, 0.05)
+        config_multirotor = MultirotorConfig()
         mavlink_config = PX4MavlinkBackendConfig({
             "vehicle_id": vehicle_id,
             "px4_autolaunch": True,
             "px4_dir": pg_app.pg.px4_path,
-            "px4_vehicle_model": "iris" # CHANGE this line to 'iris' if using PX4 version bellow v1.14
+            "px4_vehicle_model": pg_app.pg.px4_default_airframe # CHANGE this line to 'iris' if using PX4 version bellow v1.14
         })
         config_multirotor.backends = [PX4MavlinkBackend(mavlink_config)]
 
@@ -827,6 +826,26 @@ def spawn_model():
             config=config_multirotor)
         
         # breakpoint()
+        
+        # config_multirotor = pg_app.pg.generate_quadrotor_config_from_yaml(ROBOTS_CONFIG["Raynor"]) # Load Raynor's configuration
+        # mavlink_config = PX4MavlinkBackendConfig({
+        #     "vehicle_id": vehicle_id,
+        #     "px4_autolaunch": True,
+        #     "px4_dir": pg_app.pg.px4_path,
+        #     "px4_vehicle_model": "raynor",
+        #     "input_scaling": [5400, 5400, 5400, 5400], # For raynor
+        #     # "enable_lockstep": False
+        # })
+        # config_multirotor.backends = [PX4MavlinkBackend(mavlink_config)]
+
+        # Multirotor(
+        #     "/World/quadrotor",
+        #     ROBOTS['Raynor'],
+        #     vehicle_id,
+        #     drone_pos,
+        #     Rotation.from_euler("XYZ", [0.0, 0.0, 0.0], degrees=True).as_quat(),
+        #     config=config_multirotor,
+        # )
 
         # Create joints between loads and drones
         if vehicle_id==0 :
@@ -835,7 +854,7 @@ def spawn_model():
             droneJoint = UsdPhysics.Joint.Define(stage, droneJointPath)
             droneJoint.CreateBody0Rel().SetTargets([box_path])
             droneJoint.CreateBody1Rel().SetTargets([droneBodyPath])
-            joint_pos = Gf.Vec3f(0.0, 0.0, -0.08)
+            joint_pos = Gf.Vec3f(0.0, 0.0, -0.05)
             droneJoint.CreateLocalPos0Attr().Set(Gf.Vec3f(0.0, 0.0, 0.0))
             droneJoint.CreateLocalPos1Attr().Set(joint_pos)
         else:
@@ -844,7 +863,7 @@ def spawn_model():
             droneJoint = UsdPhysics.Joint.Define(stage, droneJointPath)
             droneJoint.CreateBody0Rel().SetTargets([box_path])
             droneJoint.CreateBody1Rel().SetTargets([droneBodyPath])
-            joint_pos = Gf.Vec3f(0.0, 0.0, -0.08)
+            joint_pos = Gf.Vec3f(0.0, 0.0, -0.05)
             droneJoint.CreateLocalPos0Attr().Set(Gf.Vec3f(0.0, 0.0, 0.0))
             droneJoint.CreateLocalPos1Attr().Set(joint_pos)
 
