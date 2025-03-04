@@ -57,24 +57,21 @@ class PegasusApp:
 
         # Create the vehicle
         # Try to spawn the selected robot in the world to the specified namespace
-        config_multirotor = MultirotorConfig()
-        # config_multirotor = self.pg.generate_quadrotor_config_from_yaml(ROBOTS_CONFIG["Raynor"]) # Load Raynor's configuration
+        config_multirotor = self.pg.generate_quadrotor_config_from_yaml(ROBOTS_CONFIG["Raynor"]) # Load Raynor's configuration
         
         # Create the multirotor configuration
         mavlink_config = PX4MavlinkBackendConfig({
             "vehicle_id": 0,
             "px4_autolaunch": True,
             "px4_dir": self.pg.px4_path,
-            "px4_vehicle_model": self.pg.px4_default_airframe, # CHANGE this line to 'iris' if using PX4 version bellow v1.14
-            # "px4_vehicle_model": "raynor",
-            # "input_scaling": [5400, 5400, 5400, 5400] # For raynor
+            "px4_vehicle_model": "raynor",
+            "input_scaling": [5400, 5400, 5400, 5400] # For raynor
         })
         config_multirotor.backends = [PX4MavlinkBackend(mavlink_config)]
 
         Multirotor(
             "/World/quadrotor",
-            ROBOTS['Iris'],
-            # ROBOTS['Raynor'],
+            ROBOTS['Raynor'],
             0,
             [0.0, 0.0, 0.07],
             Rotation.from_euler("XYZ", [0.0, 0.0, 0.0], degrees=True).as_quat(),

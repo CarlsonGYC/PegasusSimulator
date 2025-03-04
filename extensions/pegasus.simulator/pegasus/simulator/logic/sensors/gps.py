@@ -36,7 +36,7 @@ class GPS(Sensor):
             >>>  "gps_vxy_noise_density": 0.2,      # (m/s) / sqrt(hz)
             >>>  "gps_vz_noise_density": 0.4,       # (m/s) / sqrt(hz)
             >>>  "gps_correlation_time": 60,        # s
-            >>>  "update_rate": 1.0                 # Hz
+            >>>  "update_rate": 250.0                 # Hz
             >>> }
         """
 

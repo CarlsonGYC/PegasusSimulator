@@ -7,4 +7,4 @@ global_coordinates:
 # px4_default_airframe: gazebo-calssic_iris # Default
 # px4_default_airframe: none_iris # PX4 v1.14.3
 px4_default_airframe: iris # PX4 v1.13.0
-px4_dir: /home/longbin/Desktop/PX4-Autopilot
+px4_dir: ~/PX4-Autopilot # Set you own PX4 directory
