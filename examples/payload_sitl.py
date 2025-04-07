@@ -7,7 +7,7 @@
 import carb
 from isaacsim import SimulationApp
 
-# 创建 SimulationApp
+# SimulationApp Init
 simulation_app = SimulationApp({"headless": False})
 
 import omni.timeline
@@ -16,7 +16,7 @@ from omni.isaac.dynamic_control import _dynamic_control as dc
 from pxr import UsdGeom, PhysxSchema
 import omni.physx.scripts.utils as script_utils
 
-# 如果需要用 Pegasus 的相关类，可以自行 import
+# Import the required modules from pegasus
 from pegasus.simulator.params import ROBOTS, SIMULATION_ENVIRONMENTS
 from pegasus.simulator.logic.interface.pegasus_interface import PegasusInterface
 from pegasus.simulator.logic.backends.px4_mavlink_backend import PX4MavlinkBackend, PX4MavlinkBackendConfig
@@ -50,7 +50,7 @@ class PegasusApp:
         PhysxSchema.PhysxSceneAPI.Apply(stage.GetPrimAtPath("/physicsScene"))
         physxSceneAPI = PhysxSchema.PhysxSceneAPI.Get(stage, "/physicsScene")
 
-        # 加载环境和模型
+        # load environment
         self.pg.load_environment(SIMULATION_ENVIRONMENTS["Curved Gridroom"])
         # self.pg.load_asset(ROBOTS["Single Cable"], "/World/cable")
         # spawn_model()
@@ -147,7 +147,8 @@ class RigidBodyRopes(demo.Base):
         self._ropeLength = rope_length
         self._numRopes = num_ropes
         self._ropeSpacing = 15.0
-        self._ropeColor = demo.get_primary_color()
+        # self._ropeColor = demo.get_primary_color()
+        self._ropeColor = Gf.Vec3f(1.0, 1.0, 1.0)
 
         self._coneAngleLimit = 160
         self._slideLimit = 0.1
@@ -206,6 +207,9 @@ class RigidBodyRopes(demo.Base):
         capsuleGeom.CreateRadiusAttr(self._linkRadius)
         capsuleGeom.CreateAxisAttr(axis)
         capsuleGeom.CreateDisplayColorAttr().Set([self._ropeColor])
+        # UsdGeom.PrimvarsAPI(capsuleGeom).CreatePrimvar("displayRoughness", 
+        #                                        Sdf.ValueTypeNames.Float, 
+        #                                        UsdGeom.Tokens.uniform).Set(0.95)
 
         UsdPhysics.RigidBodyAPI.Apply(capsuleGeom.GetPrim())
         physx_rigid_api = PhysxSchema.PhysxRigidBodyAPI.Apply(capsuleGeom.GetPrim())
@@ -751,7 +755,7 @@ def spawn_model():
     # num_ropes = 1
     # To test multiple ropes, set num_ropes > 1 and customed elevation angle.
     num_ropes = 6
-    rope_length = 2
+    rope_length = 2.0
     load_height = 0.03
     elevation_angle = 0
 
@@ -765,7 +769,7 @@ def spawn_model():
         stage, 
         num_ropes=num_ropes, 
         rope_length=rope_length,
-        payload_mass=6,
+        payload_mass=3,
         load_height=load_height,
         elevation_angle=elevation_angle
         )
