@@ -29,8 +29,8 @@ ASSET_PATH = ROOT + "/pegasus.simulator/pegasus/simulator/assets"
 ROBOTS_ASSETS = ASSET_PATH + "/Robots"
 
 # Define the built in robots of the extension
-ROBOTS = {"Iris": ROBOTS_ASSETS + "/Iris/iris.usd", "Raynor": ROBOTS_ASSETS + "/Raynor/raynor.usd", "Cable": ROBOTS_ASSETS + "/Cable/sitl_test.usd", "Single Cable": ROBOTS_ASSETS + "/Cable/APIcable_single.usd"} #, "Flying Cube": ROBOTS_ASSETS + "/iris_cube.usda"}
-ROBOTS_CONFIG = {"Iris": CONFIG_PATH + "/iris.yaml", "Raynor": CONFIG_PATH + "/raynor.yaml"}
+ROBOTS = {"Iris": ROBOTS_ASSETS + "/Iris/iris.usd", "Iris_modified": ROBOTS_ASSETS + "/Iris/iris_modified.usd", "Raynor": ROBOTS_ASSETS + "/Raynor/raynor.usd", "Crazyfly": ROBOTS_ASSETS + "/Crazyfly/cf2x_pegasus.usd", "Cable": ROBOTS_ASSETS + "/Cable/sitl_test.usd", "Single Cable": ROBOTS_ASSETS + "/Cable/APIcable_single.usd"} #, "Flying Cube": ROBOTS_ASSETS + "/iris_cube.usda"}
+ROBOTS_CONFIG = {"Iris": CONFIG_PATH + "/iris.yaml", "Raynor": CONFIG_PATH + "/raynor.yaml", "Crazyfly": CONFIG_PATH + "/crazyfly.yaml"}
 
 # Setup the default simulation environments path
 NVIDIA_ASSETS_PATH = str(nucleus.get_assets_root_path())
@@ -85,7 +85,7 @@ WORLD_SETTINGS = {
     'px4': {
         "physics_dt": 1.0 / 250.0,
         "stage_units_in_meters": 1.0,
-        "rendering_dt": 1.0 / 60.0,
+        "rendering_dt": 1.0 / 30.0,
         "device": "cpu"
     },
     'ardupilot': {

@@ -65,14 +65,14 @@ class PegasusApp:
             "vehicle_id": 0,
             "px4_autolaunch": True,
             "px4_dir": self.pg.px4_path,
-            "px4_vehicle_model":  self.pg.px4_default_airframe, # CHANGE this line to 'iris' if using PX4 version bellow v1.14
+            # "px4_vehicle_model":  self.pg.px4_default_airframe, # CHANGE this line to 'iris' if using PX4 version bellow v1.14
             # "px4_vehicle_model": "raynor",
-            # "px4_vehicle_model": "iris",
+            "px4_vehicle_model": "iris_modified",
             # "input_scaling": [5400, 5400, 5400, 5400],
             # "zero_position_armed": [280.0, 280.0, 280.0, 280.0],
             # "zero_position_armed": [500.0, 500.0, 500.0, 500.0],
             # "num_rotors": 4,
-            "enable_lockstep": False,
+            # "enable_lockstep": False,
             # "update_rate": 250,
         })
         config_multirotor.backends = [PX4MavlinkBackend(mavlink_config)]
@@ -80,10 +80,10 @@ class PegasusApp:
         Multirotor(
             "/World/quadrotor",
             # ROBOTS['Raynor'],
-            ROBOTS['Iris'],
+            ROBOTS['Iris_modified'],
             0,
-            [3.0, 0.0, 0.1],
-            Rotation.from_euler("XYZ", [0.0, 0.0, 180.0], degrees=True).as_quat(),
+            [0.0, 0.0, 0.1],
+            Rotation.from_euler("XYZ", [0.0, 0.0, 0.0], degrees=True).as_quat(),
             config=config_multirotor,
         )
 

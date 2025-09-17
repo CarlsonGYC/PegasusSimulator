@@ -581,6 +581,13 @@ class PX4MavlinkBackend(Backend):
         Args:
             dt (float): The time elapsed between the previous and current function calls (s).
         """
+        # # Make sure the backend is running
+        # if not self._is_running:
+        #     self.start()
+        #     # Give PX4 time to spawn / the socket to open
+        #     if self._connection is None:
+        #         return            # come back next frame
+
 
         # Update the current u_time for px4
         self._current_utime += int(dt * 1000000)

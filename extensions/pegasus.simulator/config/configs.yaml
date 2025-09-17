@@ -9,3 +9,4 @@ px4_default_airframe: none_iris # PX4 v1.14.3
 # px4_default_airframe: raynor # PX4 v1.13.0
 px4_dir: /home/carlson/PX4-Autopilot
 # px4_dir: /home/carlson/SimulatorSetup/submodules/PX4-Autopilot
+# px4_dir: /home/carlson/Downloads/PX4-Autopilot

@@ -106,7 +106,7 @@ class Multirotor(Vehicle):
         """
 
         # Get the articulation root of the vehicle
-        articulation = self.get_dc_interface().get_articulation(self._stage_prefix)
+        articulation = self.get_dc_interface().get_articulation(self._stage_prefix)     #TODO: fix the interface of control
 
         # Get the desired angular velocities for each rotor from the first backend (can be mavlink or other) expressed in rad/s
         if len(self._backends) != 0:
